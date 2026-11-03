@@ -1,1 +1,47 @@
 
+name: Build APK
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
+      - name: Build release APK
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle :app:assembleRelease --no-daemon
+      - name: Rename APK and compute certificate checksum
+        env:
+          P: ${{ secrets.KEYSTORE_PASSWORD }}
+          A: ${{ secrets.KEY_ALIAS }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk installment.apk
+          CS=$(keytool -exportcert -keystore "$RUNNER_TEMP/release.jks" -storepass "$P" -alias "$A" | openssl dgst -sha256 -binary | openssl base64 | tr '+/' '-_' | tr -d '=\n')
+          echo "### APK_CERT_CHECKSUM for config.php" >> $GITHUB_STEP_SUMMARY
+          echo "\`$CS\`" >> $GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installment-apk
+          path: installment.apk
+      - name: Publish Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installment.apk
