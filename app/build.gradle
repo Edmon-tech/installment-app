@@ -1,0 +1,19 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.shop.installment'
+    compileSdk 34
+    defaultConfig { applicationId 'com.shop.installment'; minSdk 28; targetSdk 34; versionCode 1; versionName '1.0' }
+    signingConfigs {
+        release {
+            if (System.getenv("KEYSTORE_PATH")) {
+                storeFile file(System.getenv("KEYSTORE_PATH"))
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+    buildTypes { release { minifyEnabled false; signingConfig signingConfigs.release } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies { implementation 'androidx.work:work-runtime:2.9.1' }
