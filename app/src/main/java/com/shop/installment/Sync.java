@@ -29,7 +29,7 @@ final class Sync {
                 .putString("contact", o.optString("contact")).putString("business", o.optString("business")).putString("reminder", o.optString("reminder"))
                 .putString("lock_message", o.optString("lock_message")).putString("balance", o.isNull("balance") ? "" : o.optString("balance"))
                 .putString("next_due", o.isNull("next_due") ? "" : o.optString("next_due")).putBoolean("loc_enabled", o.optBoolean("location_enabled"))
-                .putInt("latest", o.optInt("latest_version")).putString("apk_url", o.optString("apk_url")).apply();
+                .putString("sig", o.optString("sig")).putInt("latest", o.optInt("latest_version")).putString("apk_url", o.optString("apk_url")).apply();
             if (o.optBoolean("release")) {
                 try { Api.post("released", new JSONObject().put("device_id", sp.getInt("device_id", 0)).put("token", sp.getString("token", ""))); } catch (Exception ignored) {}
                 Policy.release(c); return;

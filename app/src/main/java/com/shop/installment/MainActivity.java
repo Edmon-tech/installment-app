@@ -12,7 +12,8 @@ public class MainActivity extends Activity {
         btn(l, "Sync now", v -> syncNow());
         upd = btn(l, "Download update", v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Policy.sp(this).getString("apk_url", "")))));
         btn(l, "Allow location (if in your agreement)", v -> requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1));
-        setContentView(sv); Sync.schedule(this);
+        btn(l, "Keep connection alive (battery)", v -> { try { startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName()))); } catch (Exception e) {} });
+        setContentView(sv); Sync.schedule(this); RealtimeService.start(this);
     }
     void syncNow() { info.setText("Syncing..."); new Thread(() -> { Sync.run(this); runOnUiThread(this::render); }).start(); }
     @Override protected void onResume() { super.onResume(); render(); }

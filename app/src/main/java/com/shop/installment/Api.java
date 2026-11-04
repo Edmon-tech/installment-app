@@ -1,9 +1,10 @@
 package com.shop.installment;
 import java.io.*; import java.net.*; import org.json.JSONObject;
 final class Api {
-    static JSONObject post(String action, JSONObject body) throws Exception {
+    static JSONObject post(String action, JSONObject body) throws Exception { return post(action, body, 15000); }
+    static JSONObject post(String action, JSONObject body, int readTimeout) throws Exception {
         HttpURLConnection c = (HttpURLConnection) new URL(Cfg.API + "?a=" + action).openConnection();
-        c.setConnectTimeout(15000); c.setReadTimeout(15000); c.setRequestMethod("POST"); c.setDoOutput(true);
+        c.setConnectTimeout(15000); c.setReadTimeout(readTimeout); c.setRequestMethod("POST"); c.setDoOutput(true);
         c.setRequestProperty("Content-Type", "application/json");
         try (OutputStream o = c.getOutputStream()) { o.write(body.toString().getBytes("UTF-8")); }
         int code = c.getResponseCode();
