@@ -33,9 +33,10 @@ final class Policy {
         } catch (Exception ignored) {}
     }
     static void setLocked(Context c, boolean lock) {
-        sp(c).edit().putBoolean("locked", lock).apply();
+        boolean was = sp(c).getBoolean("locked", false); sp(c).edit().putBoolean("locked", lock).apply();
         if (!owner(c)) return; DevicePolicyManager d = dpm(c);
         if (lock) {
+            if (!was) { try { d.lockNow(); } catch (Exception ignored) {} }
             String dialer = null; try { dialer = ((TelecomManager) c.getSystemService(Context.TELECOM_SERVICE)).getDefaultDialerPackage(); } catch (Exception ignored) {}
             d.setLockTaskPackages(cn(c), dialer != null ? new String[]{c.getPackageName(), dialer} : new String[]{c.getPackageName()});
             d.setLockTaskFeatures(cn(c), DevicePolicyManager.LOCK_TASK_FEATURE_NONE);

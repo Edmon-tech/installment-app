@@ -20,8 +20,10 @@ final class Sync {
                 JSONObject o = Api.post("register", r);
                 sp.edit().putInt("device_id", o.getInt("device_id")).putString("token", o.getString("token")).remove("enroll_code").apply();
             }
+            String ft = sp.getString("fcm", "");
+            if (ft.isEmpty()) { try { ft = com.google.android.gms.tasks.Tasks.await(com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken(), 10, TimeUnit.SECONDS); sp.edit().putString("fcm", ft).apply(); } catch (Throwable e) { ft = ""; } }
             JSONObject h = new JSONObject().put("device_id", sp.getInt("device_id", 0)).put("token", sp.getString("token", ""))
-                .put("app_version", Policy.verName(c)).put("android_version", Build.VERSION.RELEASE);
+                .put("app_version", Policy.verName(c)).put("android_version", Build.VERSION.RELEASE).put("fcm_token", ft);
             if (sp.getBoolean("loc_enabled", false)) { Location l = loc(c); if (l != null) h.put("lat", l.getLatitude()).put("lng", l.getLongitude()); }
             JSONObject o = Api.post("heartbeat", h);
             String old = sp.getString("reminder", "");
